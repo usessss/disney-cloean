@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 // Css-in-JS 라고 하는 JS 파일 안에서 CSS 처리할 수 있게 해주는 라이브러리
 import styled from 'styled-components';
 
 const Nav = () => {
     // 네브바 보여줄지 말지 결정하는 상태값 (true: 보이기, false: 숨기기)
     const [show, setShow] = useState(false);
+
+    // 검색을 위한 스테이트
+    const [searchValue, setSearchValue] = useState('');
+
+    // useNavigate: 페이지 이동(라우팅)을 위해 사용하는 함수형 훅
+    const navigate = useNavigate();
 
     const listener = () => {
         // 현재 스크롤 위치가 50px보다 크면 네브바 보여주기
@@ -27,6 +34,13 @@ const Nav = () => {
         }
     }, []);
 
+    const handleChange = (e) => {
+        // 입력창에 입력된 값을 상태에 저장
+        setSearchValue(e.target.value);
+        // 입력값을 쿼리로 포함해 /search 페이지로 이동
+        navigate(`/search?q=${e.target.value}`);
+    }
+
   return (
     // 컴포넌트에 props로 show 값을 전달 (styled-components에서 $접두어는 커스텀 props로 많이 씀)
     <NavWrapper $show={show}>
@@ -38,9 +52,14 @@ const Nav = () => {
       </Logo>
 
       {/* 검색창을 위한 인풋 */}
-      <Input>
-
-      </Input>
+      <Input
+        value={searchValue}
+        // 타이핑할 때마다 searchValue를 업데이트해주는 함수넣기
+        onChange={handleChange}
+        className='nav__input'
+        type='text'
+        placeholder='영화를 검색해주세요.'
+      />
     </NavWrapper>
   )
 }
