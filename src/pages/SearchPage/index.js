@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axiosInstance from '../../api/axios';
+import '../../pages/SearchPage/SearchPage.css';
+import { useDebounce } from '../../hooks/useDebounce';
 
 const SearchPage = () => {
 
@@ -10,6 +12,9 @@ const SearchPage = () => {
 
   // 3. state (데이터 기억하기)
   const [searchResults, setSearchResults] = useState([]);
+
+  // 각 영화 클릭 시 해당 상세페이지로 이동할 수 있도록 useNavigate 훅으로 navigate 함수 생성
+  const navigate = useNavigate();
 
   // 1. spiderman
   const useQuery = () => {
@@ -21,15 +26,16 @@ const SearchPage = () => {
   let query = useQuery();
   // 쿼리 문자열 중에서 'q'에 해당하는 값을 가져옴 (ex. spiderman)
   const searchTerm = query.get("q");
-  console.log(searchTerm);
+  // searchTerm: 내가 검색창에 타이핑한 값을 useDebounce에 넘김 (value 매개변수로 들어감)
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);  // ✅ 500ms = 0.5초
 
   // 2. 요청 -> 응답 (spiderman에 관련된 데이터 요청 하고 응답 받기)
   useEffect(() => {
     // 인풋에 값이 있을 때만 함수 호출
-    if (searchTerm) {
-      fetchSearchMovie(searchTerm);
+    if (debouncedSearchTerm) {
+      fetchSearchMovie(debouncedSearchTerm);
     }
-  }, [searchTerm]);  // 인풋 값이 변경되면 다시 함수 호출
+  }, [debouncedSearchTerm]);  // 인풋 값이 변경되면 다시 함수 호출
 
   const fetchSearchMovie = async (searchTerm) => {
     try {
@@ -50,31 +56,51 @@ const SearchPage = () => {
     }
   }
 
-
   // 4. 화면에 보여주기
   // 데이터가 있으면
   if (searchResults.length > 0) {
     return (
+      // 🔹 검색 결과 전체를 감싸는 영역
       <section className='search-container'>
         {/* 조건 처리 해주기 위해 중괄호 {} 사용 */}
+        {/* 🔸 map 돌면서 결과 하나씩 렌더링 */}
         {searchResults.map(movie => {
           // backdrop_path가 null이면 포스터가 없는 것도 있음(그래서 생략하기 위해 조건 넣어줌)
           // media_type이 'person'이면 배우/감독 정보라서 영화/TV 포스터가 아니므로 제외
           if(movie.backdrop_path !== null && movie.media_type !== 'person') {
+
+            const movieImageUrl = "https://image.tmdb.org/t/p/w500" + movie.backdrop_path;
+
             return (
-              <div>
-                
+              // 🔹 개별 영화 하나를 감싸는 영역
+              <div className='movie' key={movie.id}>
+                {/* 🔸 포스터 전체를 감싸는 영역 (클릭 영역) → 클릭 시 상세 페이지 이동 */}
+                <div
+                  onClick={() => navigate(`/${movie.id}`)}
+                  className='movie__column-poster'
+                >
+                  {/* 🔸 실제 영화 포스터 이미지 */}
+                  <img 
+                    src={movieImageUrl}
+                    alt='movie'
+                    className='movie__poster'
+                  />
+                </div>
               </div>
             )
           }
         })}
       </section>
     )
-  } else {  // 없으면
+  } else {  // 찾고자 하는 영화 데이터가 없을 때
     return (
-      <div>
-
-      </div>
+      <section className='no-results'>
+        <div className='no-results__text'>
+          <p>
+            찾고자 하는 검색어 "{searchTerm}"에 맞는 영화가 없습니다.
+          </p>
+        </div>
+      </section>
     )
   }
 }

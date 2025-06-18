@@ -1,0 +1,40 @@
+.search-container {
+    background-color: black;
+    width: 100%;
+    text-align: center;
+    padding: 5rem 0;
+}
+
+.movie__column-poster {
+    cursor: pointer;
+    /* transform 속성에 변화가 생기면 0.3초 동안 부드럽게 애니메이션 처리함 */
+    transition: transform 0.3s;   
+}
+
+/* 호버 시 요소를 가로세로 1.25배 확대해서 25% 커지게 함 */
+.movie__column-poster:hover {
+    transform: scale(1.25);
+}
+
+.movie__poster {
+    width: 90%;
+    border-radius: 5px;
+}
+
+.movie {
+    /* 
+        flex-grow: 1 (가능하면 공간을 키움), 
+        flex-shrink: 1 (공간 줄어듦 허용),
+        flex-basis: auto (기본 크기는 내용 크기) 
+    */
+    flex: 1 1 auto;
+    /* 
+        요소를 인라인처럼 옆으로 나열하되,
+        블록처럼 크기와 마진 지정 가능하게 함 
+    */
+    display: inline-block;
+    /* 0.5 * 16px = 8px */
+    padding-right: 0.5rem;
+    /* 7 * 16px = 112px */
+    padding-bottom: 7rem;
+}

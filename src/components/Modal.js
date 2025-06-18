@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import './Modal.css';
+import useOnClickOutside from '../hooks/useOnClickOutside';
 
 const Modal = ({
     // {...movieSelected} 이렇게 해줘서 바로 가져올 수 있는것
@@ -13,29 +14,33 @@ const Modal = ({
     setIsModalOpen
 }) => {
 
-  // 모달 외부 클릭 시 닫기 위한 함수
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  }
+  // 📦useRef: "이 HTML 태그가 뭔지 기억하게 해주는 상자" 
+  // 일반 JS는 document.querySelector('.modal') 쓰는데 리액트에선 useRef로 함
+  const modalRef = useRef(null); 
+  console.log(modalRef);  // 출력: Object -> current: null
+  // "모달 바깥 클릭하면 setIsModalOpen(false)를 실행해서 모달을 닫아줘!" 라는 뜻
+  useOnClickOutside(modalRef, () => setIsModalOpen(false));
 
   return (
     // role 속성: 웹 접근성 높이기 위해 요소의 용도(역할) 를 설명해주는 속성
     // 화면 전체 덮는 배경
     <div className='presentation' role='presentation'>
       {/* 모달을 가운데로 정렬하는 감싸는 박스 */}
-      {/* 배경 클릭 시 모달이 닫히도록 onClick 이벤트 추가 */}
       <div 
         className='wrapper-modal'
-        onClick={handleCloseModal}
       >
         {/* 실제 내용이 들어가는 모달창 본체 (여기에 텍스트, 버튼, 영화 정보 등등!) */}
         {/* 
-          모달 컨텐츠 자체 클릭했을 땐 이벤트가 배경으로 전파(버블링)되지 않도록 막아줌 
-          -> 이렇게 해야 모달 안의 내용을 클릭해도 모달창 닫히지 않음
+          이 div 요소를 modalRef 라는 ref 객체에 연결해줌
+          => 이렇게 하면 나중에 modalRef.current로 이 div에 직접 접근할 수 있음
+          즉, 이 태그가 실제로 어떤 DOM인지 기억하게 해주는 역할
+
+          {current: null}-> {current: div.modal(요소)}로 바꼈어도 리렌더링X
+          이유 : ref.current는 그냥 저장소 역할이기 때문, 렌더링 영향 주는 건 state!
         */}
         <div 
           className='modal'
-          onClick={(e) => e.stopPropagation()}
+          ref={modalRef}
         >
           <span 
             onClick={() => setIsModalOpen(false)}

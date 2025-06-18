@@ -45,10 +45,12 @@ const Nav = () => {
     // 컴포넌트에 props로 show 값을 전달 (styled-components에서 $접두어는 커스텀 props로 많이 씀)
     <NavWrapper $show={show}>
       <Logo>
-        <img  
-            src='/images/logo.svg'
-            alt='Disney plus logo'
-        />
+        <a href='/main'>
+            <img  
+                src='/images/logo.svg'
+                alt='Disney plus logo'
+            />
+        </a>
       </Logo>
 
       {/* 검색창을 위한 인풋 */}
