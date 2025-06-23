@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 // Css-in-JS 라고 하는 JS 파일 안에서 CSS 처리할 수 있게 해주는 라이브러리
 import styled from 'styled-components';
 
@@ -12,6 +12,9 @@ const Nav = () => {
 
     // useNavigate: 페이지 이동(라우팅)을 위해 사용하는 함수형 훅
     const navigate = useNavigate();
+
+    // 현재 주소(pathname)를 가져와서 "/main" 페이지일 땐 LOGIN 버튼 숨기기 위해 사용
+    const { pathname } = useLocation();
 
     const listener = () => {
         // 현재 스크롤 위치가 50px보다 크면 네브바 보여주기
@@ -41,6 +44,12 @@ const Nav = () => {
         navigate(`/search?q=${e.target.value}`);
     }
 
+    // 로그인 버튼 클릭했을 때 handleAuth 함수 호출
+    const handleAuth = () => {
+        // 구글 로그인을 위해 firebase 에서 제공한 방법 사용
+        
+    }
+
   return (
     // 컴포넌트에 props로 show 값을 전달 (styled-components에서 $접두어는 커스텀 props로 많이 씀)
     <NavWrapper $show={show}>
@@ -53,18 +62,45 @@ const Nav = () => {
         </a>
       </Logo>
 
-      {/* 검색창을 위한 인풋 */}
-      <Input
-        value={searchValue}
-        // 타이핑할 때마다 searchValue를 업데이트해주는 함수넣기
-        onChange={handleChange}
-        className='nav__input'
-        type='text'
-        placeholder='영화를 검색해주세요.'
-      />
+      {/* 현재 경로가 '/'일 때는 로그인 버튼, 그 외에는 검색창(Input) 보여주기 */}
+      {pathname === '/' ?
+        (<Login onClick={handleAuth}>
+            Login
+        </Login>) 
+        :
+        // 영화 검색을 위한 입력창
+        <Input
+            value={searchValue}
+            // 입력값이 바뀔 때 searchValue 업데이트
+            onChange={handleChange}
+            className='nav__input'
+            type='text'
+            placeholder='영화를 검색해주세요.'
+        />  
+      }
+      
     </NavWrapper>
   )
 }
+
+const Login = styled.a`
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 8px 16px;
+    text-transform: uppercase; // 대문자로
+    letter-spacing: 1.5px;  // 사이 간격
+    border: 1px solid #f9f9f9;
+    border-radius: 4px;
+    // transition: 애니메이션 효과를 줄 때 사용하는 속성
+    // 기본 문법 - transition: 속성 지속시간 타이밍함수 지연시간;
+    // 모든 스타일 변화가 0.2초 동안 부드럽게(ease) 지연 없이(0s) 실행
+    transition: all 0.2s ease 0s;
+
+    &:hover {
+        background-color: #f9f9f9;
+        color: #000;
+        border-color: transparent;  // 테두리 안 보이게
+    }
+`;
 
 const Input = styled.input`
     position: fixed;
