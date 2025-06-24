@@ -14,7 +14,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig); // Firebase 앱 초기화
 
 // 외부에서도 app 사용할거니까 내보내기
 export default app;

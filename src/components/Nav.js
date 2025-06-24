@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 // Css-in-JS 라고 하는 JS 파일 안에서 CSS 처리할 수 있게 해주는 라이브러리
 import styled from 'styled-components';
+// firebase 인증(auth) 기능 중에서
+// - GoogleAuthProvider: 구글 로그인 제공자 객체를 만들어주는 함수
+// - signInWithPopup: 팝업 창을 띄워서 로그인 처리하는 함수
+import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } from 'firebase/auth';
+// 초기화한 Firebase 앱(app)을 가져오기
+import app from '../firebase';
 
 const Nav = () => {
     // 네브바 보여줄지 말지 결정하는 상태값 (true: 보이기, false: 숨기기)
@@ -15,6 +21,13 @@ const Nav = () => {
 
     // 현재 주소(pathname)를 가져와서 "/main" 페이지일 땐 LOGIN 버튼 숨기기 위해 사용
     const { pathname } = useLocation();
+
+    // 구글 로그인 제공자 생성
+    // “구글 로그인으로 할 거니까, 그에 맞는 로그인 방법을 써줘!” 라고 알려주는것
+    const provider = new GoogleAuthProvider();
+
+    // 초기화된 Firebase 앱(app)을 기반으로 인증(auth) 기능을 사용하겠다는 뜻
+    const auth = getAuth(app);
 
     const listener = () => {
         // 현재 스크롤 위치가 50px보다 크면 네브바 보여주기
@@ -37,6 +50,29 @@ const Nav = () => {
         }
     }, []);
 
+    useEffect(() => {
+        // onAuthStateChanged: 로그인 상태가 바뀔 때마다 호출되는 Firebase 함수
+        // auth: Firebase 인증 객체
+        // user: 로그인한 유저가 있으면 user 객체, 없으면 null
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if(user) {
+                // ✅ 로그인 상태일 경우
+                // → 메인 페이지로 자동 이동
+                navigate("/main");
+            } else {
+                // ❌ 로그아웃 상태일 경우
+                // → 로그인 페이지로 자동 이동
+                navigate("/");
+            }
+        })
+
+        // 컴포넌트가 언마운트(사라질)될 때 실행됨
+        // → 메모리 누수 방지를 위해 이벤트 구독 해제
+        return () => {
+            unsubscribe();  // onAuthStateChanged 등록 해제
+        }
+    }, [auth, navigate]);  // auth 또는 navigate가 바뀔 때마다 useEffect 다시 실행됨
+
     const handleChange = (e) => {
         // 입력창에 입력된 값을 상태에 저장
         setSearchValue(e.target.value);
@@ -47,7 +83,13 @@ const Nav = () => {
     // 로그인 버튼 클릭했을 때 handleAuth 함수 호출
     const handleAuth = () => {
         // 구글 로그인을 위해 firebase 에서 제공한 방법 사용
-        
+        signInWithPopup(auth ,provider)
+            .then((result) => {
+                console.log(result);
+            })
+            .catch((error) => {
+                console.log(error);
+            })
     }
 
   return (
